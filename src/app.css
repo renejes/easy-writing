@@ -1,0 +1,67 @@
+:root {
+	--bg: #ffffff;
+	--fg: #111111;
+	--muted: #666666;
+	--line: #111111;
+	--hairline: #dddddd;
+	--font: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+	--measure: 72ch;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	min-height: 100%;
+	background: var(--bg);
+	color: var(--fg);
+	font-family: var(--font);
+	font-size: 15px;
+	line-height: 1.55;
+	-webkit-font-smoothing: antialiased;
+}
+
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+	background: var(--bg);
+	border: 1px solid var(--line);
+	padding: 0.35rem 0.5rem;
+}
+
+button {
+	font: inherit;
+	color: inherit;
+	background: var(--bg);
+	border: 1px solid var(--line);
+	padding: 0.45rem 0.85rem;
+	cursor: pointer;
+}
+
+button:hover,
+button:focus-visible {
+	background: var(--fg);
+	color: var(--bg);
+	outline: none;
+}
+
+button.active {
+	background: var(--fg);
+	color: var(--bg);
+}
+
+button:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+a {
+	color: inherit;
+}

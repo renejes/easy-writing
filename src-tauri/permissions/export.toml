@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-html-to-pdf"
+description = "Allow exporting HTML to PDF"
+commands.allow = ["html_to_pdf"]

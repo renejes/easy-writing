@@ -1,0 +1,226 @@
+.editor-content {
+	outline: none;
+	min-height: 60vh;
+}
+
+.editor-content p.is-editor-empty:first-child::before {
+	content: attr(data-placeholder);
+	float: left;
+	color: var(--muted);
+	pointer-events: none;
+	height: 0;
+}
+
+.editor-content h1,
+.editor-content h2,
+.editor-content h3 {
+	font-size: 1em;
+	font-weight: 700;
+	margin: 1.6em 0 0.6em;
+}
+
+.editor-content h1 {
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.editor-content p {
+	margin: 0 0 0.9em;
+}
+
+.editor-content ul,
+.editor-content ol {
+	margin: 0 0 0.9em;
+	padding-left: 1.4em;
+}
+
+.editor-content blockquote {
+	margin: 0 0 0.9em;
+	padding-left: 1em;
+	border-left: 1px solid var(--line);
+}
+
+.editor-content a {
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+.editor-content code {
+	font-family: inherit;
+	border: 1px solid var(--hairline);
+	padding: 0.05em 0.3em;
+}
+
+.editor-content pre {
+	border: 1px solid var(--line);
+	padding: 0.8em 1em;
+	overflow-x: auto;
+	margin: 0 0 0.9em;
+}
+
+.editor-content pre code {
+	border: 0;
+	padding: 0;
+}
+
+.editor-content hr {
+	border: 0;
+	border-top: 1px solid var(--line);
+	margin: 1.6em 0;
+}
+
+.editor-content table {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 0 0 0.9em;
+}
+
+.editor-content th,
+.editor-content td {
+	border: 1px solid var(--fg);
+	padding: 0.25em 0.5em;
+	vertical-align: top;
+}
+
+.editor-content th {
+	font-weight: 700;
+	background: transparent;
+}
+
+.editor-content td p,
+.editor-content th p {
+	margin: 0;
+}
+
+.editor-content img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+	border: 1px solid var(--line);
+	margin: 0 0 0.9em;
+}
+
+.editor-content figure {
+	margin: 0 0 1.2em;
+}
+
+.editor-content figure img {
+	margin-bottom: 0.4em;
+}
+
+.editor-content figcaption {
+	font-size: 0.85em;
+	color: var(--muted);
+}
+
+.editor-content .cite-chip,
+.editor-content .fn-chip {
+	display: inline;
+	border: 1px solid var(--line);
+	padding: 0 0.25em;
+	margin: 0 0.1em;
+	cursor: pointer;
+	font-size: 0.9em;
+}
+
+.editor-content .cite-chip.is-unknown {
+	border-style: dashed;
+	color: var(--muted);
+}
+
+.editor-content .spell-error {
+	/* WKWebView ignores text-decoration on decoration spans inside contenteditable. */
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='3' viewBox='0 0 6 3'><path fill='none' stroke='%23cc0000' stroke-width='1.15' d='M0 2.1 C1.5 2.1 1.5 0.85 3 0.85 S4.5 2.1 6 2.1'/></svg>");
+	background-repeat: repeat-x;
+	background-position: 0 100%;
+	background-size: 6px 3px;
+	padding-bottom: 0.12em;
+}
+
+.cite-suggest {
+	z-index: 30;
+	min-width: 16rem;
+	max-width: 28rem;
+	max-height: 16rem;
+	overflow: auto;
+	border: 1px solid var(--line);
+	background: var(--bg);
+	padding: 0.25rem;
+	font-family: var(--font);
+	font-size: 0.8rem;
+}
+
+.cite-suggest p {
+	margin: 0;
+	padding: 0.4rem 0.5rem;
+	color: var(--muted);
+}
+
+.cite-suggest ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.cite-suggest li {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	padding: 0.35rem 0.45rem;
+	cursor: pointer;
+}
+
+.cite-suggest li.is-selected,
+.cite-suggest li:hover {
+	background: var(--fg);
+	color: var(--bg);
+}
+
+.cite-suggest span {
+	opacity: 0.75;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.spell-menu {
+	z-index: 40;
+	position: fixed;
+	min-width: 12rem;
+	max-width: 22rem;
+	border: 1px solid var(--line);
+	background: var(--bg);
+	padding: 0.25rem;
+	font-family: var(--font);
+	font-size: 0.8rem;
+}
+
+.spell-menu p {
+	margin: 0;
+	padding: 0.4rem 0.5rem;
+	color: var(--muted);
+}
+
+.spell-menu ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.spell-menu li button,
+.spell-menu .add {
+	display: block;
+	width: 100%;
+	text-align: left;
+	border: 0;
+	padding: 0.35rem 0.45rem;
+	background: transparent;
+}
+
+.spell-menu li button:hover,
+.spell-menu li button:focus-visible,
+.spell-menu .add:hover,
+.spell-menu .add:focus-visible {
+	background: var(--fg);
+	color: var(--bg);
+}
