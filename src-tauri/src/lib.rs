@@ -6,6 +6,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_scoped_storage::init())
         .invoke_handler(tauri::generate_handler![html_to_pdf])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

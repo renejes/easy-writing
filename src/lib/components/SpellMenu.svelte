@@ -3,7 +3,7 @@
 	import { addWordToProjectDictionary } from '$lib/session';
 	import { closeSpellMenu, getSpellEditor, spellMenu } from '$lib/spell/menuState.svelte';
 
-	function onWindowMouseDown(event: MouseEvent): void {
+	function onWindowPointerDown(event: PointerEvent): void {
 		if (!spellMenu.open) {
 			return;
 		}
@@ -41,7 +41,7 @@
 	}
 </script>
 
-<svelte:window onmousedown={onWindowMouseDown} onkeydown={onKeydown} />
+<svelte:window onpointerdown={onWindowPointerDown} onkeydown={onKeydown} />
 
 {#if spellMenu.open}
 	<div class="spell-menu" style:left="{spellMenu.x}px" style:top="{spellMenu.y}px">

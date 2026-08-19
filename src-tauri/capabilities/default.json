@@ -3,10 +3,14 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
+  "remote": {
+    "urls": ["http://*:*", "http://*"]
+  },
   "permissions": [
     "core:default",
     "opener:default",
     "dialog:default",
+    "scoped-storage:default",
     "fs:default",
     "fs:allow-home-read-recursive",
     "fs:allow-home-write-recursive",

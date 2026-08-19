@@ -7,6 +7,7 @@ export const en: Record<MessageKey, string> = {
 	newProject: 'New project',
 	recent: 'Recent',
 	noRecent: 'No projects yet.',
+	removeRecent: 'Remove from list',
 	language: 'Language',
 	german: 'Deutsch',
 	english: 'English',

@@ -103,5 +103,9 @@ export function resolveFrom(fromDir: string, relative: string): string {
 		}
 		stack.push(part);
 	}
-	return `/${stack.join('/')}`.replace(/^\/+/, '/');
+	const joined = stack.join('/');
+	if (stack[0]?.startsWith('scoped:')) {
+		return joined;
+	}
+	return `/${joined}`.replace(/^\/+/, '/');
 }

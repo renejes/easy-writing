@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Editor } from '@tiptap/core';
-	import { untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { appState } from '$lib/appState.svelte';
-	import { setEditorAssetContext } from '$lib/editor/assetSrc';
+	import { setEditorAssetContext, hydrateEditorImages } from '$lib/editor/assetSrc';
 	import { createMarkdownEditor } from '$lib/editor/createEditor';
 	import { insertFootnote } from '$lib/editor/insertCite';
 	import { refreshCitationNodes, serializeEditorMarkdown } from '$lib/editor/markdownRoundtrip';
@@ -38,6 +38,15 @@
 	let lastWritten = untrack(() => appState.lastSavedContent);
 	let paintedBibEpoch = 0;
 	let bibExpanded = $state(true);
+	let allowBack = $state(false);
+	let sidebarOpen = $state(false);
+
+	onMount(() => {
+		const timer = window.setTimeout(() => {
+			allowBack = true;
+		}, 800);
+		return () => window.clearTimeout(timer);
+	});
 
 	const showList = $derived.by(() => {
 		switch (appState.projectType) {
@@ -70,6 +79,8 @@
 			}
 		}
 	});
+
+	const sidebarToggleLabel = $derived(showList ? listLabel : t('bibliography'));
 
 	async function persist(): Promise<void> {
 		const instance = editor;
@@ -144,6 +155,7 @@
 		paintedBibEpoch = appState.bibEpoch;
 		appState.wordCount = countWords(instance.getText());
 		appState.flushDocument = () => saver.flush();
+		void hydrateEditorImages(instance.view.dom);
 		if (appState.crashRecovered) {
 			appState.saveStatus = 'dirty';
 			saver.schedule();
@@ -175,10 +187,18 @@
 	});
 
 	async function goBack(): Promise<void> {
+		if (!allowBack) {
+			return;
+		}
 		await closeOpenProject();
 	}
 
 	async function onKeydown(event: KeyboardEvent): Promise<void> {
+		if (event.key === 'Escape' && sidebarOpen) {
+			event.preventDefault();
+			sidebarOpen = false;
+			return;
+		}
 		const mod = event.metaKey || event.ctrlKey;
 		if (!mod) {
 			return;
@@ -211,16 +231,32 @@
 	}}
 />
 
-<div class={['shell', showSidebar && 'with-sidebar']}>
+<div class={['shell', showSidebar && 'with-sidebar', sidebarOpen && 'sidebar-open']}>
 	<header>
 		<button type="button" onclick={goBack}>{t('back')}</button>
+		{#if showSidebar}
+			<button
+				type="button"
+				class="sidebar-toggle"
+				aria-expanded={sidebarOpen}
+				onclick={() => (sidebarOpen = !sidebarOpen)}
+			>
+				{sidebarToggleLabel}
+			</button>
+		{/if}
 		<p>{appState.projectTitle}</p>
 		<button type="button" onclick={() => void exportCurrentProject()}>{t('export')}</button>
 		{#if !showList}
 			<button type="button" class="add" onclick={() => void addChapter()}>{t('addFile')}</button>
 		{/if}
 		{#if appState.projectType === 'blog'}
-			<button type="button" onclick={() => (appState.bibPanelOpen = !appState.bibPanelOpen)}>
+			<button
+				type="button"
+				onclick={() => {
+					appState.bibPanelOpen = !appState.bibPanelOpen;
+					sidebarOpen = appState.bibPanelOpen;
+				}}
+			>
 				{t('bibliography')}
 			</button>
 		{/if}
@@ -266,6 +302,12 @@
 	</div>
 
 	{#if showSidebar}
+		<button
+			type="button"
+			class="sidebar-scrim"
+			aria-label={t('dismiss')}
+			onclick={() => (sidebarOpen = false)}
+		></button>
 		<div class="sidebar-slot">
 			<div class={['sidebar-stack', showList && 'has-chapters']}>
 				{#if showList}
@@ -274,7 +316,10 @@
 							chapters={appState.chapters}
 							activePath={appState.filePath}
 							label={listLabel}
-							onselect={(path) => void selectChapter(path)}
+							onselect={(path) => {
+								sidebarOpen = false;
+								void selectChapter(path);
+							}}
 							onadd={() => void addChapter()}
 							onrename={(path) => void renameChapter(path)}
 							ondelete={(path) => void deleteChapter(path)}
@@ -301,7 +346,8 @@
 
 <style>
 	.shell {
-		min-height: 100vh;
+		height: var(--app-height, 100dvh);
+		min-height: 0;
 		display: grid;
 		grid-template-columns: 1fr;
 		grid-template-rows: auto auto auto 1fr auto;
@@ -311,6 +357,7 @@
 			'toolbar'
 			'canvas'
 			'status';
+		transform: translateY(var(--app-offset, 0px));
 	}
 
 	.shell.with-sidebar {
@@ -327,14 +374,20 @@
 		grid-area: header;
 		display: flex;
 		align-items: center;
+		flex-wrap: wrap;
 		gap: 0.6rem;
-		padding: 0.7rem 1.5rem;
+		padding: max(0.7rem, env(safe-area-inset-top, 0px)) max(1.5rem, env(safe-area-inset-right, 0px))
+			0.7rem max(1.5rem, env(safe-area-inset-left, 0px));
 		border-bottom: 1px solid var(--line);
+		background: var(--bg);
+		position: relative;
+		z-index: 30;
 	}
 
 	header p {
 		margin: 0;
 		flex: 1;
+		min-width: 6rem;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -343,6 +396,14 @@
 	header button {
 		padding: 0.3rem 0.7rem;
 		font-size: 0.8rem;
+	}
+
+	.sidebar-toggle {
+		display: none;
+	}
+
+	.sidebar-scrim {
+		display: none;
 	}
 
 	.banners {
@@ -366,12 +427,17 @@
 
 	.toolbar-slot {
 		grid-area: toolbar;
+		background: var(--bg);
+		position: relative;
+		z-index: 30;
+		min-width: 0;
 	}
 
 	.sidebar-slot {
 		grid-area: sidebar;
 		min-height: 0;
 		overflow: hidden;
+		background: var(--bg);
 	}
 
 	.sidebar-stack {
@@ -410,6 +476,7 @@
 		grid-area: canvas;
 		overflow: auto;
 		min-width: 0;
+		overscroll-behavior: contain;
 	}
 
 	.page {
@@ -420,5 +487,58 @@
 
 	.status-slot {
 		grid-area: status;
+		background: var(--bg);
+		position: relative;
+		z-index: 30;
+	}
+
+	@media (max-width: 63.99rem) {
+		.shell.with-sidebar {
+			grid-template-columns: 1fr;
+			grid-template-areas:
+				'header'
+				'banners'
+				'toolbar'
+				'canvas'
+				'status';
+		}
+
+		.sidebar-toggle {
+			display: inline-flex;
+			align-items: center;
+		}
+
+		.sidebar-scrim {
+			display: none;
+			grid-area: canvas;
+			z-index: 24;
+			width: 100%;
+			height: 100%;
+			border: 0;
+			padding: 0;
+			min-width: 0;
+			min-height: 0;
+			border-radius: 0;
+			background: rgb(255 255 255 / 0.72);
+		}
+
+		.shell.sidebar-open .sidebar-scrim {
+			display: block;
+		}
+
+		.sidebar-slot {
+			grid-area: canvas;
+			justify-self: start;
+			z-index: 25;
+			display: none;
+			width: min(20rem, 88vw);
+			height: 100%;
+			border-right: 1px solid var(--line);
+			padding-left: env(safe-area-inset-left, 0px);
+		}
+
+		.shell.sidebar-open .sidebar-slot {
+			display: block;
+		}
 	}
 </style>

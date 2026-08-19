@@ -133,10 +133,16 @@
 		text-align: left;
 	}
 
-	.toggle:hover,
 	.toggle:focus-visible {
 		background: transparent;
 		color: inherit;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.toggle:hover {
+			background: transparent;
+			color: inherit;
+		}
 	}
 
 	.chevron {

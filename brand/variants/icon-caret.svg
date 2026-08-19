@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="title">
+  <title id="title">Easy Writing</title>
+  <rect width="32" height="32" fill="#111111"/>
+  <path fill="#ffffff" d="M6 6h20v4H10v4h8v4H10v4h16v4H6V6z"/>
+  <rect fill="#ffffff" x="22" y="14" width="4" height="4"/>
+</svg>

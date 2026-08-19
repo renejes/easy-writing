@@ -1,5 +1,6 @@
 import { watch, type UnwatchFn, type WatchEvent } from '@tauri-apps/plugin-fs';
 import { isOwnWrite } from './ownWrites';
+import { isScopedPath } from './scopedPath';
 import { shouldIgnorePath } from './watchIgnore';
 
 export type ProjectFileChange = {
@@ -28,6 +29,9 @@ export async function watchDirectory(
 	root: string,
 	onChange: (change: ProjectFileChange) => void,
 ): Promise<UnwatchFn> {
+	if (isScopedPath(root)) {
+		return () => {};
+	}
 	return watch(
 		root,
 		(event) => {

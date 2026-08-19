@@ -41,6 +41,13 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "iOS": {
+      "developmentTeam": "3LAHNFWNT3"
+    },
+    "macOS": {
+      "signingIdentity": "Developer ID Application: Rene Jesser (3LAHNFWNT3)",
+      "entitlements": "Entitlements.plist"
+    }
   }
 }

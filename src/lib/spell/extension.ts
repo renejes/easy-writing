@@ -88,25 +88,28 @@ async function runCheck(view: EditorView): Promise<void> {
 	);
 }
 
-function onContextMenu(view: EditorView, event: MouseEvent): boolean {
-	const coords = view.posAtCoords({ left: event.clientX, top: event.clientY });
+function markAtPoint(view: EditorView, clientX: number, clientY: number) {
+	const coords = view.posAtCoords({ left: clientX, top: clientY });
 	if (!coords) {
-		return false;
+		return null;
 	}
 	const decorations = spellPluginKey.getState(view.state);
 	if (!decorations) {
-		return false;
+		return null;
 	}
-	const found = decorations.find(coords.pos, coords.pos);
-	const mark = found[0];
-	if (!mark) {
-		return false;
-	}
-	event.preventDefault();
+	return decorations.find(coords.pos, coords.pos)[0] ?? null;
+}
+
+function openMenuForMark(
+	view: EditorView,
+	mark: { from: number; to: number },
+	clientX: number,
+	clientY: number,
+): void {
 	const word = view.state.doc.textBetween(mark.from, mark.to);
 	openSpellMenu({
-		x: event.clientX,
-		y: event.clientY,
+		x: clientX,
+		y: clientY,
 		word,
 		from: mark.from,
 		to: mark.to,
@@ -117,7 +120,29 @@ function onContextMenu(view: EditorView, event: MouseEvent): boolean {
 			spellMenu.suggestions = suggestions;
 		}
 	});
+}
+
+function onContextMenu(view: EditorView, event: MouseEvent): boolean {
+	const mark = markAtPoint(view, event.clientX, event.clientY);
+	if (!mark) {
+		return false;
+	}
+	event.preventDefault();
+	openMenuForMark(view, mark, event.clientX, event.clientY);
 	return true;
+}
+
+function onClick(view: EditorView, event: MouseEvent): boolean {
+	const target = event.target;
+	if (!(target instanceof Element) || !target.closest('.spell-error')) {
+		return false;
+	}
+	const mark = markAtPoint(view, event.clientX, event.clientY);
+	if (!mark) {
+		return false;
+	}
+	openMenuForMark(view, mark, event.clientX, event.clientY);
+	return false;
 }
 
 export const Spellcheck = Extension.create({
@@ -148,6 +173,9 @@ export const Spellcheck = Extension.create({
 					handleDOMEvents: {
 						contextmenu(view, event) {
 							return onContextMenu(view, event);
+						},
+						click(view, event) {
+							return onClick(view, event);
 						},
 					},
 				},

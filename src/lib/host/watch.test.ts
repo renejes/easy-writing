@@ -6,6 +6,8 @@ describe('shouldIgnorePath', () => {
 		expect(shouldIgnorePath('/proj/index.mdx.ewtmp')).toBe(true);
 		expect(shouldIgnorePath('/proj/.DS_Store')).toBe(true);
 		expect(shouldIgnorePath('/proj/.easy-writing/lock.json')).toBe(true);
+		expect(shouldIgnorePath('/proj/easy-writing.lock.json')).toBe(true);
+		expect(shouldIgnorePath('/proj/Unknown File.easy-writing/lock.json')).toBe(true);
 		expect(shouldIgnorePath('/proj/index.mdx')).toBe(false);
 	});
 });

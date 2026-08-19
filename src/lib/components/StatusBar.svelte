@@ -75,7 +75,8 @@
 		grid-template-columns: 1fr auto 1fr;
 		gap: 1rem;
 		align-items: center;
-		padding: 0.55rem 1.5rem;
+		padding: 0.55rem max(1.5rem, env(safe-area-inset-right, 0px))
+			max(0.55rem, env(safe-area-inset-bottom, 0px)) max(1.5rem, env(safe-area-inset-left, 0px));
 		border-top: 1px solid var(--line);
 		font-size: 0.8rem;
 		color: var(--muted);
@@ -99,5 +100,17 @@
 	select {
 		padding: 0.15rem 0.35rem;
 		font-size: 0.8rem;
+	}
+
+	@media (max-width: 63.99rem) {
+		footer {
+			grid-template-columns: 1fr auto;
+		}
+
+		footer span:nth-child(2) {
+			grid-column: 1 / -1;
+			order: -1;
+			text-align: left;
+		}
 	}
 </style>

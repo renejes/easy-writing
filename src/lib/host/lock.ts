@@ -1,8 +1,8 @@
-import { joinPath, makeDir, pathExists, readText, removePath, writeText } from './files';
+import { joinPath, pathExists, readText, removePath, writeText } from './files';
+import { LEGACY_LOCK_DIR, LOCK_FILE_NAME } from './lockNames';
 
 const MACHINE_ID_KEY = 'easy-writing.machineId';
-const LOCK_DIR = '.easy-writing';
-const LOCK_FILE = 'lock.json';
+const LEGACY_LOCK_FILE = 'lock.json';
 export const LOCK_STALE_MS = 2 * 60 * 1000;
 export const LOCK_HEARTBEAT_MS = 30 * 1000;
 
@@ -31,7 +31,15 @@ export function getMachineId(): string {
 }
 
 export function machineLabel(): string {
-	const ua = typeof navigator === 'undefined' ? '' : navigator.userAgent;
+	if (typeof navigator === 'undefined') {
+		return 'Computer';
+	}
+	const ua = navigator.userAgent;
+	const iPad =
+		/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+	if (iPad) {
+		return 'iPad';
+	}
 	if (ua.includes('Mac')) {
 		return 'Mac';
 	}
@@ -53,16 +61,16 @@ export function isOurLock(lock: ProjectLock): boolean {
 }
 
 export async function lockPath(root: string): Promise<string> {
-	return joinPath(root, LOCK_DIR, LOCK_FILE);
+	return joinPath(root, LOCK_FILE_NAME);
 }
 
-export async function readLock(root: string): Promise<ProjectLock | null> {
-	const path = await lockPath(root);
-	if (!(await pathExists(path))) {
-		return null;
-	}
+async function legacyLockPath(root: string): Promise<string> {
+	return joinPath(root, LEGACY_LOCK_DIR, LEGACY_LOCK_FILE);
+}
+
+function parseLock(raw: string): ProjectLock | null {
 	try {
-		const parsed: unknown = JSON.parse(await readText(path));
+		const parsed: unknown = JSON.parse(raw);
 		if (!isRecord(parsed)) {
 			return null;
 		}
@@ -85,9 +93,22 @@ export async function readLock(root: string): Promise<ProjectLock | null> {
 	}
 }
 
+async function readLockFile(path: string): Promise<ProjectLock | null> {
+	if (!(await pathExists(path))) {
+		return null;
+	}
+	try {
+		return parseLock(await readText(path));
+	} catch {
+		return null;
+	}
+}
+
+export async function readLock(root: string): Promise<ProjectLock | null> {
+	return (await readLockFile(await lockPath(root))) ?? (await readLockFile(await legacyLockPath(root)));
+}
+
 export async function writeLock(root: string): Promise<ProjectLock> {
-	const dir = await joinPath(root, LOCK_DIR);
-	await makeDir(dir);
 	const lock: ProjectLock = {
 		user: 'lokal',
 		machine: machineLabel(),
@@ -103,8 +124,9 @@ export async function releaseLock(root: string): Promise<void> {
 	if (!current || !isOurLock(current)) {
 		return;
 	}
-	const path = await lockPath(root);
-	if (await pathExists(path)) {
-		await removePath(path);
+	for (const path of [await lockPath(root), await legacyLockPath(root)]) {
+		if (await pathExists(path)) {
+			await removePath(path);
+		}
 	}
 }

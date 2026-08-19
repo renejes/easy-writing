@@ -5,6 +5,7 @@ import { formatHostError } from '$lib/host/error';
 import { importImageBytes, importImagePath, isImageFile } from '$lib/host/assets';
 import { t } from '$lib/i18n';
 import { appDialog } from '$lib/ui/dialog.svelte';
+import { hydrateEditorImages } from './assetSrc';
 
 export type ImageInsertKind = 'image' | 'figure';
 
@@ -48,6 +49,7 @@ async function importAndInsert(
 		return;
 	}
 	insertNode(editor, kind, imported.relativeSrc, meta.alt, meta.caption);
+	await hydrateEditorImages(editor.view.dom);
 }
 
 function requireProject(): { projectRoot: string; chapterPath: string } | null {

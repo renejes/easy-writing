@@ -135,6 +135,7 @@
 	background-position: 0 100%;
 	background-size: 6px 3px;
 	padding-bottom: 0.12em;
+	cursor: pointer;
 }
 
 .cite-suggest {
@@ -170,10 +171,16 @@
 	cursor: pointer;
 }
 
-.cite-suggest li.is-selected,
-.cite-suggest li:hover {
+.cite-suggest li.is-selected {
 	background: var(--fg);
 	color: var(--bg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.cite-suggest li:hover {
+		background: var(--fg);
+		color: var(--bg);
+	}
 }
 
 .cite-suggest span {
@@ -217,10 +224,24 @@
 	background: transparent;
 }
 
-.spell-menu li button:hover,
 .spell-menu li button:focus-visible,
-.spell-menu .add:hover,
 .spell-menu .add:focus-visible {
 	background: var(--fg);
 	color: var(--bg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.spell-menu li button:hover,
+	.spell-menu .add:hover {
+		background: var(--fg);
+		color: var(--bg);
+	}
+}
+
+@media (pointer: coarse) {
+	.cite-suggest li,
+	.spell-menu li button,
+	.spell-menu .add {
+		min-height: 44px;
+	}
 }

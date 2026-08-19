@@ -145,7 +145,8 @@
 		flex-wrap: wrap;
 		gap: 0.35rem;
 		align-items: center;
-		padding: 0.7rem 1.5rem;
+		padding: 0.7rem max(1.5rem, env(safe-area-inset-right, 0px)) 0.7rem
+			max(1.5rem, env(safe-area-inset-left, 0px));
 		border-bottom: 1px solid var(--line);
 	}
 
@@ -154,10 +155,24 @@
 		height: 1.2rem;
 		background: var(--line);
 		margin: 0 0.25rem;
+		flex: 0 0 auto;
 	}
 
 	button {
 		padding: 0.3rem 0.55rem;
 		font-size: 0.8rem;
+	}
+
+	@media (pointer: coarse) {
+		.toolbar {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			overscroll-behavior-x: contain;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		button {
+			flex: 0 0 auto;
+		}
 	}
 </style>

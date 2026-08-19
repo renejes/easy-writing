@@ -226,4 +226,16 @@
 		gap: 0.25rem;
 		flex-wrap: wrap;
 	}
+
+	@media (pointer: coarse) {
+		.handle {
+			min-width: 44px;
+		}
+
+		.title,
+		.tiny,
+		.add {
+			min-height: 44px;
+		}
+	}
 </style>

@@ -5,6 +5,7 @@ export const de = {
 	newProject: 'Neues Projekt',
 	recent: 'Zuletzt geöffnet',
 	noRecent: 'Noch keine Projekte.',
+	removeRecent: 'Aus der Liste entfernen',
 	language: 'Sprache',
 	german: 'Deutsch',
 	english: 'English',

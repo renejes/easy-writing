@@ -24,6 +24,8 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tauri-plugin-fs = { version = "2", features = ["watch"] }
 tauri-plugin-dialog = "2"
+# Path copy of 1.5.1: iOS was releasing the security-scoped folder before I/O.
+tauri-plugin-scoped-storage = { path = "vendor/tauri-plugin-scoped-storage" }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"

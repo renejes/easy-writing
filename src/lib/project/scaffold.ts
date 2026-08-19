@@ -141,7 +141,7 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<string>
 
 	await writeText(await joinPath(root, 'project.yaml'), serializeManifest(manifest));
 	try {
-		await writeText(await joinPath(root, '.gitignore'), '.easy-writing/\n');
+		await writeText(await joinPath(root, '.gitignore'), 'easy-writing.lock.json\n.easy-writing/\n');
 	} catch {
 		// Hidden files can be blocked by the host; the project is still usable.
 	}

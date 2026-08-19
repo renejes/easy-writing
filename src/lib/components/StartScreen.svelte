@@ -1,9 +1,19 @@
 <script lang="ts">
 	import { appState } from '$lib/appState.svelte';
+	import { releaseScopedFolder } from '$lib/host/dialogs';
 	import { setLocale, t } from '$lib/i18n';
+	import { recentSubtitle } from '$lib/project/recent';
+	import type { RecentProject } from '$lib/project/types';
 	import { newProjectUi } from '$lib/ui/newProject.svelte';
 
 	let { onopen }: { onopen: (path?: string) => void } = $props();
+
+	async function forget(project: RecentProject, event: MouseEvent): Promise<void> {
+		event.preventDefault();
+		event.stopPropagation();
+		appState.forgetRecent(project);
+		await releaseScopedFolder(project.path);
+	}
 </script>
 
 <main class="start">
@@ -28,10 +38,21 @@
 		{:else}
 			<ul>
 				{#each appState.recent as project (project.path)}
+					{@const location = recentSubtitle(project)}
 					<li>
 						<button type="button" class="recent" onclick={() => onopen(project.path)}>
 							<span>{project.name}</span>
-							<span class="muted">{project.path}</span>
+							{#if location}
+								<span class="muted">{location}</span>
+							{/if}
+						</button>
+						<button
+							type="button"
+							class="forget"
+							aria-label={t('removeRecent')}
+							onclick={(event) => void forget(project, event)}
+						>
+							×
 						</button>
 					</li>
 				{/each}
@@ -60,13 +81,17 @@
 
 <style>
 	.start {
-		min-height: 100vh;
+		height: var(--app-height, 100dvh);
+		overflow: auto;
 		max-width: 42rem;
 		margin: 0 auto;
-		padding: 12vh 1.5rem 3rem;
+		padding: max(12vh, calc(env(safe-area-inset-top, 0px) + 2rem))
+			max(1.5rem, env(safe-area-inset-right, 0px)) max(3rem, env(safe-area-inset-bottom, 0px))
+			max(1.5rem, env(safe-area-inset-left, 0px));
 		display: flex;
 		flex-direction: column;
 		gap: 2rem;
+		transform: translateY(var(--app-offset, 0px));
 	}
 
 	.kicker {
@@ -93,6 +118,7 @@
 
 	.actions {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 0.6rem;
 	}
 
@@ -115,8 +141,15 @@
 		gap: 0.4rem;
 	}
 
+	li {
+		display: flex;
+		align-items: stretch;
+		gap: 0.35rem;
+	}
+
 	.recent {
-		width: 100%;
+		flex: 1;
+		min-width: 0;
 		text-align: left;
 		display: flex;
 		flex-direction: column;
@@ -127,6 +160,16 @@
 	.recent span:last-child {
 		font-size: 0.75rem;
 		word-break: break-all;
+	}
+
+	.forget {
+		flex: 0 0 auto;
+		min-width: 2.75rem;
+		padding: 0 0.7rem;
+		border-color: var(--hairline);
+		color: var(--muted);
+		line-height: 1;
+		font-size: 1.2rem;
 	}
 
 	footer {

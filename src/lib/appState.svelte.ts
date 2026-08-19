@@ -1,9 +1,10 @@
 import type { ChapterRef, ProjectManifest, ProjectType, RecentProject } from '$lib/project/types';
 import type { BibEntry } from '$lib/cite/parseBib';
+import { MAX_RECENT, upsertRecent, withoutRecent } from '$lib/project/recent';
+import { parseScopedPath, scopedDisplayName, scopedUri, toScopedRoot } from '$lib/host/scopedPath';
 
 const LOCALE_KEY = 'easy-writing.locale';
 const RECENT_KEY = 'easy-writing.recent-projects';
-const MAX_RECENT = 8;
 
 export type Locale = 'de' | 'en';
 export type SaveStatus = 'saved' | 'saving' | 'dirty' | 'error';
@@ -33,15 +34,33 @@ function readStoredRecent(): RecentProject[] {
 		if (!Array.isArray(parsed)) {
 			return [];
 		}
-		return parsed.filter((entry): entry is RecentProject => {
-			return (
-				typeof entry === 'object' &&
-				entry !== null &&
-				typeof (entry as RecentProject).path === 'string' &&
-				typeof (entry as RecentProject).name === 'string' &&
-				typeof (entry as RecentProject).openedAt === 'number'
-			);
+		const recents = parsed.filter((entry): entry is RecentProject => {
+			if (
+				typeof entry !== 'object' ||
+				entry === null ||
+				typeof (entry as RecentProject).path !== 'string' ||
+				typeof (entry as RecentProject).name !== 'string' ||
+				typeof (entry as RecentProject).openedAt !== 'number'
+			) {
+				return false;
+			}
+			const uri = (entry as RecentProject).uri;
+			const location = (entry as RecentProject).location;
+			if (uri !== undefined && typeof uri !== 'string') {
+				return false;
+			}
+			if (location !== undefined && typeof location !== 'string') {
+				return false;
+			}
+			return true;
 		});
+		for (const entry of recents) {
+			const parsedPath = parseScopedPath(entry.path);
+			if (parsedPath) {
+				toScopedRoot(parsedPath.id, entry.location ?? entry.name, entry.uri);
+			}
+		}
+		return recents;
 	} catch {
 		return [];
 	}
@@ -171,10 +190,27 @@ class AppState {
 	}
 
 	remember(path: string, name: string): void {
-		const next: RecentProject[] = [
-			{ path, name, openedAt: Date.now() },
-			...this.recent.filter((entry) => entry.path !== path),
-		].slice(0, MAX_RECENT);
+		const parsed = parseScopedPath(path);
+		this.persistRecent(
+			upsertRecent(
+				this.recent,
+				{
+					path,
+					name,
+					openedAt: Date.now(),
+					uri: parsed ? scopedUri(parsed.id) : undefined,
+					location: parsed ? scopedDisplayName(parsed.id) : undefined,
+				},
+				MAX_RECENT,
+			),
+		);
+	}
+
+	forgetRecent(project: RecentProject): void {
+		this.persistRecent(withoutRecent(this.recent, project));
+	}
+
+	persistRecent(next: RecentProject[]): void {
 		this.recent = next;
 		localStorage.setItem(RECENT_KEY, JSON.stringify(next));
 	}

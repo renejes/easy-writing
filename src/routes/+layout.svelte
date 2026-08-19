@@ -20,8 +20,21 @@
 
 	let { children }: { children: Snippet } = $props();
 
+	function syncAppViewport(): void {
+		const viewport = window.visualViewport;
+		const height = viewport?.height ?? window.innerHeight;
+		const offset = viewport?.offsetTop ?? 0;
+		document.documentElement.style.setProperty('--app-height', `${Math.round(height)}px`);
+		document.documentElement.style.setProperty('--app-offset', `${Math.round(offset)}px`);
+	}
+
 	onMount(() => {
 		let stopQuit: (() => void) | undefined;
+		syncAppViewport();
+		const viewport = window.visualViewport;
+		viewport?.addEventListener('resize', syncAppViewport);
+		viewport?.addEventListener('scroll', syncAppViewport);
+		window.addEventListener('resize', syncAppViewport);
 		void (async () => {
 			const settings = await loadAppSettings();
 			if (settings) {
@@ -34,6 +47,9 @@
 			stopQuit = await installQuitFlush(() => appState.flushDocument());
 		})();
 		return () => {
+			viewport?.removeEventListener('resize', syncAppViewport);
+			viewport?.removeEventListener('scroll', syncAppViewport);
+			window.removeEventListener('resize', syncAppViewport);
 			stopQuit?.();
 		};
 	});

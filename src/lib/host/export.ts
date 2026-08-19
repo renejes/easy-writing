@@ -10,6 +10,7 @@ import {
 	writeBytes,
 	writeText,
 } from './files';
+import { isLockSidecarName } from './lockNames';
 
 export async function htmlToPdf(html: string, dest: string): Promise<void> {
 	await invoke('html_to_pdf', { html, dest });
@@ -75,7 +76,7 @@ export async function copyDir(from: string, to: string): Promise<void> {
 	await makeDir(to);
 	const entries = await listDir(from);
 	for (const entry of entries) {
-		if (entry.name === '.easy-writing' || entry.name === '.git') {
+		if (entry.name === '.git' || isLockSidecarName(entry.name)) {
 			continue;
 		}
 		const src = await joinPath(from, entry.name);

@@ -26,6 +26,7 @@ import {
 } from '$lib/host/export';
 import { pickBibFile, pickDirectory } from '$lib/host/dialogs';
 import { formatHostError } from '$lib/host/error';
+import { holdScopedFolder } from '$lib/host/scope';
 import {
 	dirNameOf,
 	fileNameOf,
@@ -68,6 +69,7 @@ let unwatch: UnwatchFn | null = null;
 let heartbeat: ReturnType<typeof setInterval> | null = null;
 let ownsLock = false;
 let handlingWatch = false;
+let suppressCloseUntil = 0;
 
 function fail(message: string): boolean {
 	appState.lastError = message;
@@ -243,6 +245,7 @@ async function onFsChange(change: ProjectFileChange): Promise<void> {
 
 async function loadProjectAt(projectRoot: string, preferredFile: string | null): Promise<boolean> {
 	await stopRuntime();
+	await holdScopedFolder(projectRoot);
 	const yamlPath = await joinPath(projectRoot, 'project.yaml');
 	let manifest: ProjectManifest;
 	let offerCreateManifest = false;
@@ -309,6 +312,7 @@ async function loadProjectAt(projectRoot: string, preferredFile: string | null):
 		lockWarning,
 		crashRecovered: loaded.recovered,
 	});
+	suppressCloseUntil = Date.now() + 800;
 	await loadBibliography();
 	await applySpellFromDisk();
 	try {
@@ -358,6 +362,9 @@ export async function createNewProject(title: string, type: ProjectType): Promis
 }
 
 export async function closeOpenProject(): Promise<void> {
+	if (Date.now() < suppressCloseUntil) {
+		return;
+	}
 	appState.conflict = false;
 	await appState.flushDocument();
 	await stopRuntime();

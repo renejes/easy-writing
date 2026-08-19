@@ -125,12 +125,16 @@
 <style>
 	.scrim {
 		position: fixed;
-		inset: 0;
+		left: 0;
+		right: 0;
+		top: var(--app-offset, 0px);
+		height: var(--app-height, 100dvh);
 		z-index: 40;
 		background: rgb(255 255 255 / 0.92);
 		display: grid;
 		place-items: center;
-		padding: 1.5rem;
+		padding: max(1.5rem, env(safe-area-inset-top, 0px)) max(1.5rem, env(safe-area-inset-right, 0px))
+			max(1.5rem, env(safe-area-inset-bottom, 0px)) max(1.5rem, env(safe-area-inset-left, 0px));
 	}
 
 	.dialog {
@@ -141,7 +145,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		max-height: min(36rem, 90vh);
+		max-height: min(36rem, 90dvh);
 		overflow: auto;
 	}
 
@@ -177,6 +181,7 @@
 		align-items: center;
 		gap: 0.45rem;
 		font-size: 0.9rem;
+		min-height: 44px;
 	}
 
 	.tiny {
